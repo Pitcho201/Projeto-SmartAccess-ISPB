@@ -1,0 +1,32 @@
+# Ignorar ambientes virtuais
+venv39/
+venv/
+env/
+.venv/
+
+
+# Ignorar rostos salvos e capturas
+known_faces/
+capturas/
+__pycache__/
+*.pyc
+
+# Ignorar arquivos grandes de mídia ou temporários
+*.mp4
+*.avi
+*.zip
+*.db-journal
+
+# Ignorar IDEs e sistemas operacionais
+*.log
+.DS_Store
+.idea/
+.vscode/
+
+# Ignorar o banco de dados se quiser (opcional)
+database.db
+
+
+# Ignorar arquivos temporários
+Serv/
+dlib-19.24/

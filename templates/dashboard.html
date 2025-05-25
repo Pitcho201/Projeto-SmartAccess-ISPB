@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard - SmartAccess ISPBié</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        overflow-x: hidden;
+      }
+
+      .sidebar {
+        background-color: #343a40;
+        color: white;
+        padding-top: 20px;
+        min-height: 100vh;
+        position: fixed;
+        width: 220px;
+        top: 0;
+        left: 0;
+        z-index: 1040;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: transform 0.3s ease;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .sidebar.collapsed {
+        transform: translateX(-220px);
+      }
+
+      .sidebar-logo {
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #495057;
+        width: 100%;
+      }
+
+      .sidebar-logo img {
+        max-width: 100px;
+        border-radius: 50%;
+        border: 2px solid #f8f9fa;
+        margin-bottom: 10px;
+        box-shadow: 0 0.15rem 0.5rem rgba(0, 0, 0, 0.1);
+      }
+
+      .sidebar h4 {
+        margin-top: 10px;
+        color: white;
+      }
+
+      .sidebar a {
+        padding: 12px 20px;
+        text-decoration: none;
+        color: white;
+        display: block;
+        width: 100%;
+        transition: background-color 0.3s ease;
+      }
+
+      .sidebar a:hover {
+        background-color: #495057;
+      }
+
+      .sidebar .nav-link i {
+        margin-right: 8px;
+      }
+
+      #menu-toggle {
+        position: fixed;
+        top: 8px;
+        left: 10px;
+        z-index: 1100;
+        background-color: transparent;
+        border: none;
+        color: #343a40;
+        font-size: 1.8rem;
+        cursor: pointer;
+      }
+
+      #menu-toggle:hover {
+        background-color: #495057;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.4);
+        z-index: 1030;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+      }
+
+      .overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .content {
+        margin-left: 220px;
+        padding: 20px 20px 20px 80px;
+        transition: margin-left 0.3s ease;
+      }
+
+      .content.expanded {
+        margin-left: 0;
+        padding-left: 20px;
+      }
+
+      @media (max-width: 768px) {
+        #menu-toggle {
+          left: 15px;
+        }
+
+        .sidebar {
+          transform: translateX(-220px);
+          box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar.active {
+          transform: translateX(0);
+        }
+
+        .content {
+          margin-left: 0 !important;
+          padding: 20px 10px 20px 10px;
+        }
+      }
+
+      @media (min-width: 769px) {
+        .content {
+          margin-top: 60px; /* Evita sobreposição com botão no desktop */
+        }
+      }
+
+      .btn-reconhecimento {
+        background-color: #28a745;
+        color: white;
+        font-size: 1.1rem;
+        padding: 12px 25px;
+        border-radius: 0.3rem;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+      }
+
+      .btn-reconhecimento:hover {
+        background-color: #218838;
+      }
+
+      .curso-card {
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.15rem 0.5rem rgba(0, 0, 0, 0.05);
+        padding: 15px;
+        margin: 10px;
+        text-align: center;
+        flex-grow: 1;
+        min-width: 150px;
+      }
+
+      .curso-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        padding: 10px;
+        border-radius: 0.3rem;
+        transition: background-color 0.3s ease;
+      }
+
+      .curso-link.informática {
+        background-color: #007bff;
+        color: white;
+      }
+
+      .curso-link.enfermagem {
+        background-color: #28a745;
+        color: white;
+      }
+
+      .curso-link.contabilidade {
+        background-color: #ffc107;
+        color: black;
+      }
+
+      .curso-link:hover {
+        opacity: 0.9;
+      }
+
+      .table th {
+        background-color: #343a40;
+        color: white;
+      }
+      main.content {
+        padding-top: 0px; /* Adiciona margem para evitar que o botão tape o título */
+      }
+    </style>
+  </head>
+  <body>
+    <button id="menu-toggle" aria-label="Toggle menu">
+      <i class="bi bi-list" style="font-size: 1.5rem"></i>
+    </button>
+
+    <nav class="sidebar" role="navigation" aria-label="Sidebar navigation">
+      <div class="sidebar-logo">
+        <img
+          src="{{ url_for('static', filename='img/logo.jpg') }}"
+          alt="Logo ISPBié"
+        />
+        <h4>SmartAccess</h4>
+      </div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a
+            class="nav-link active"
+            href="{{ url_for('dashboard', curso=curso) }}"
+          >
+            <i class="bi bi-house-door-fill"></i> Painel
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('entradas') }}">
+            <i class="bi bi-clock-history"></i> Registros de Entrada
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('registrar') }}">
+            <i class="bi bi-person-plus-fill"></i> Registrar Estudante
+          </a>
+        </li>
+          <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('opcoes') }}">
+            <i class="bi bi-gear-fill"></i> Opções
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('logout') }}">
+            <i class="bi bi-box-arrow-left"></i> Sair
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="overlay"></div>
+
+    <main class="content" role="main">
+      <h1 class="mb-4">Painel do Administrador</h1>
+
+      <div class="text-center mb-4">
+        <a href="{{ url_for('reconhecer') }}" class="btn btn-reconhecimento">
+          <i class="bi bi-camera-fill"></i> Iniciar Reconhecimento Facial
+        </a>
+      </div>
+
+      <h3 class="mb-3">Estudantes do Curso: {{ curso }}</h3>
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+          <thead class="thead-dark">
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Número do BI</th>
+              <th>Período</th>
+              <th>Ano de Frequência</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for estudante in estudantes %}
+            <tr>
+              <td>{{ estudante.id }}</td>
+              <td>{{ estudante.nome }}</td>
+              <td>{{ estudante.numero_bi }}</td>
+              <td>{{ estudante.periodo }}</td>
+              <td>{{ estudante.ano_frequencia }}</td>
+              <td>
+                <a
+                  href="{{ url_for('gerenciar_estudante', id=estudante.id) }}"
+                  class="btn btn-sm btn-outline-primary btn-gerenciar"
+                  >Gerenciar</a
+                >
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="mt-5">Escolher outro curso</h3>
+      <div class="d-flex flex-wrap justify-content-center">
+        <div class="curso-card">
+          <a
+            href="{{ url_for('dashboard', curso='Informática') }}"
+            class="curso-link informática {% if curso == 'Informática' %}active{% endif %}"
+            >Informática</a
+          >
+        </div>
+        <div class="curso-card">
+          <a
+            href="{{ url_for('dashboard', curso='Enfermagem') }}"
+            class="curso-link enfermagem {% if curso == 'Enfermagem' %}active{% endif %}"
+            >Enfermagem</a
+          >
+        </div>
+        <div class="curso-card">
+          <a
+            href="{{ url_for('dashboard', curso='Contabilidade') }}"
+            class="curso-link contabilidade {% if curso == 'Contabilidade' %}active{% endif %}"
+            >Contabilidade</a
+          >
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const menuToggle = document.getElementById("menu-toggle");
+      const sidebar = document.querySelector(".sidebar");
+      const content = document.querySelector(".content");
+      const overlay = document.querySelector(".overlay");
+
+      function isMobile() {
+        return window.innerWidth <= 768;
+      }
+
+      function closeSidebarMobile() {
+        sidebar.classList.remove("active");
+        overlay.classList.remove("active");
+      }
+
+      function openSidebarMobile() {
+        sidebar.classList.add("active");
+        overlay.classList.add("active");
+      }
+
+      menuToggle.addEventListener("click", () => {
+        if (isMobile()) {
+          sidebar.classList.toggle("active");
+          overlay.classList.toggle("active");
+        } else {
+          sidebar.classList.toggle("collapsed");
+          content.classList.toggle("expanded");
+        }
+      });
+
+      overlay.addEventListener("click", closeSidebarMobile);
+
+      window.addEventListener("resize", () => {
+        if (!isMobile()) {
+          sidebar.classList.remove("active");
+          overlay.classList.remove("active");
+          sidebar.classList.remove("collapsed");
+          content.classList.remove("expanded");
+        }
+      });
+
+      window.addEventListener("load", () => {
+        if (!isMobile()) {
+          sidebar.classList.remove("collapsed");
+          content.classList.remove("expanded");
+        }
+      });
+    </script>
+  </body>
+</html>

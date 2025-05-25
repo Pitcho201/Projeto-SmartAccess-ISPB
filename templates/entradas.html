@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registros de Entrada - SmartAccess ISPBié</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Estilos específicos para esta página podem ser adicionados aqui, */
+        /* ou no arquivo style.css para reutilização */
+        .filter-section {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 0.5rem;
+            margin-bottom: 20px;
+        }
+
+        .table th {
+            background-color: #495057;
+            color: white;
+        }
+
+        .btn-filter {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 0.3rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-filter:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 0.3rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">SmartAccess ISPBié</a>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Registros de Entrada</h2>
+
+        <div class="filter-section">
+            <form method="get" class="text-center">
+                <div class="row justify-content-center g-3">
+                    <div class="col-md-2">
+                        <label for="curso" class="form-label fw-bold">Curso:</label>
+                        <select name="curso" id="curso" class="form-select">
+                            <option value="Informática" {% if curso == 'Informática' %}selected{% endif %}>Informática</option>
+                            <option value="Enfermagem" {% if curso == 'Enfermagem' %}selected{% endif %}>Enfermagem</option>
+                            <option value="Contabilidade" {% if curso == 'Contabilidade' %}selected{% endif %}>Contabilidade</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Pesquisar nome ou BI:</label>
+                        <input type="text" name="termo" class="form-control" value="{{ termo }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Data Início:</label>
+                        <input type="date" name="data_inicio" class="form-control" value="{{ data_inicio }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Data Fim:</label>
+                        <input type="date" name="data_fim" class="form-control" value="{{ data_fim }}">
+                    </div>
+                    <div class="col-md-2 align-self-end">
+                        <button type="submit" class="btn btn-filter w-100">
+                            <i class="bi bi-filter-fill"></i> Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Data e Hora</th>
+                        <th>Nome</th>
+                        <th>Número do BI</th>
+                        <th>Curso</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entrada in registros %}
+                    <tr>
+                        <td>{{ entrada['data_hora'] }}</td>
+                        <td>{{ entrada['nome'] }}</td>
+                        <td>{{ entrada['numero_bi'] }}</td>
+                        <td>{{ entrada['curso'] }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-delete" onclick="confirmarExclusao({{ entrada['id'] }})">
+                                <i class="bi bi-trash-fill"></i> Excluir
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left-circle-fill"></i> Voltar ao Painel
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function confirmarExclusao(id) {
+            if (confirm("Tem certeza que deseja excluir este registro de entrada?")) {
+                window.location.href = "/excluir_entrada/" + id;
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

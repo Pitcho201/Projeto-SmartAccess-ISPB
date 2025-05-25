@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Registrar Estudante</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    video, canvas {
+      max-width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+  <h2>Registrar Novo Estudante</h2>
+  <form method="POST" enctype="multipart/form-data" id="formRegistro">
+
+    <!-- Abas -->
+    <ul class="nav nav-tabs" id="formTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-pessoal" data-bs-toggle="tab" data-bs-target="#dadosPessoais" type="button" role="tab">Dados Pessoais</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-academico" data-bs-toggle="tab" data-bs-target="#dadosAcademicos" type="button" role="tab">Dados Acadêmicos</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-foto" data-bs-toggle="tab" data-bs-target="#fotoEstudante" type="button" role="tab">Foto do Estudante</button>
+      </li>
+    </ul>
+
+    <div class="tab-content border border-top-0 p-3">
+      <!-- Aba Dados Pessoais -->
+      <div class="tab-pane fade show active" id="dadosPessoais" role="tabpanel">
+        <div class="mb-3">
+          <label class="form-label">Nome completo:</label>
+          <input type="text" class="form-control" name="nome" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Data de Nascimento:</label>
+          <div class="d-flex gap-2">
+            <select name="dia_nascimento" class="form-select" required>
+              {% for d in range(1, 32) %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+            </select>
+            <select name="mes_nascimento" class="form-select" required>
+              {% for m in range(1, 13) %}<option value="{{ m }}">{{ m }}</option>{% endfor %}
+            </select>
+            <select name="ano_nascimento" class="form-select" required>
+              {% for y in range(1980, 2025) %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Número do BI:</label>
+          <input type="text" class="form-control" name="numero_bi" required>
+        </div>
+      </div>
+
+      <!-- Aba Dados Acadêmicos -->
+      <div class="tab-pane fade" id="dadosAcademicos" role="tabpanel">
+        <div class="mb-3">
+          <label class="form-label">Curso:</label>
+          <select class="form-select" name="curso" required>
+            <option value="Informática">Informática</option>
+            <option value="Enfermagem">Enfermagem</option>
+            <option value="Contabilidade">Contabilidade</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Período:</label>
+          <select class="form-select" name="periodo" required>
+            <option value="Regular">Regular</option>
+            <option value="Pós-Laboral">Pós-Laboral</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Ano de Frequência:</label>
+          <select class="form-select" name="ano_frequencia" required>
+            <option value="1º Ano">1º Ano</option>
+            <option value="2º Ano">2º Ano</option>
+            <option value="3º Ano">3º Ano</option>
+            <option value="4º Ano">4º Ano</option>
+            <option value="5º Ano">5º Ano</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Aba Foto -->
+      <div class="tab-pane fade" id="fotoEstudante" role="tabpanel">
+        <div class="mb-3">
+          <label class="form-label">Selecionar método de envio de foto:</label>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="metodo_foto" value="upload" id="radioUpload" checked onclick="alternarMetodoFoto()">
+            <label class="form-check-label" for="radioUpload">Upload Manual</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="metodo_foto" value="camera" id="radioCamera" onclick="alternarMetodoFoto()">
+            <label class="form-check-label" for="radioCamera">Capturar com Câmera</label>
+          </div>
+        </div>
+
+        <div class="mb-3" id="fotoUpload">
+          <label class="form-label">Foto do rosto (Upload):</label>
+          <input type="file" class="form-control" name="foto_manual" accept="image/*">
+        </div>
+
+        <div class="mb-3 d-none" id="fotoCamera">
+          <label class="form-label">Capturar foto com a câmera:</label><br>
+          <video id="webcam" autoplay></video>
+          <canvas id="captura" style="display:none;"></canvas>
+          <input type="hidden" name="imagem_capturada" id="imagem_capturada">
+          <button type="button" class="btn btn-outline-primary mt-2" onclick="capturarFoto()">📷 Capturar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botões -->
+    <div class="mt-4">
+      <button type="submit" class="btn btn-success">Registrar Estudante</button>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  const video = document.getElementById('webcam');
+  const canvas = document.getElementById('captura');
+  const inputCaptura = document.getElementById('imagem_capturada');
+
+  function alternarMetodoFoto() {
+    const metodo = document.querySelector('input[name="metodo_foto"]:checked').value;
+    document.getElementById('fotoUpload').classList.toggle('d-none', metodo !== 'upload');
+    document.getElementById('fotoCamera').classList.toggle('d-none', metodo !== 'camera');
+  }
+
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => { video.srcObject = stream; })
+    .catch(err => { console.error("Erro ao acessar webcam", err); });
+
+  function capturarFoto() {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    const imagem = canvas.toDataURL('image/jpeg');
+    inputCaptura.value = imagem;
+    alert("✅ Foto capturada com sucesso!");
+  }
+  // Validação personalizada
+  document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('formRegistro');
+  if (!form) return;
+
+  form.addEventListener('submit', (e) => {
+    let valido = true;
+    form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+    const mostrarErro = (input, mensagem) => {
+      input.classList.add('is-invalid');
+      const feedback = document.createElement('div');
+      feedback.className = 'invalid-feedback';
+      feedback.innerText = mensagem;
+      input.parentNode.appendChild(feedback);
+      valido = false;
+    };
+
+    const validarNome = campo => {
+      const valor = campo.value.trim();
+      if (!valor) {
+        mostrarErro(campo, 'Campo obrigatório.');
+      } else if (!/^[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+(?:\s[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+)+$/.test(valor)) {
+        mostrarErro(campo, 'Informe pelo menos dois nomes, iniciando com letras maiúsculas.');
+      }
+    };
+
+    const validarBI = campo => {
+      const valor = campo.value.trim();
+      if (!valor) {
+        mostrarErro(campo, 'Número do BI é obrigatório.');
+      } else if (!/^\d{9}[A-Z]{2}\d{3}$/i.test(valor)) {
+        mostrarErro(campo, 'Formato inválido. Exemplo correto: 123456789LA012');
+      }
+    };
+
+    validarNome(form.querySelector('[name="nome"]'));
+    validarBI(form.querySelector('[name="numero_bi"]'));
+
+    ['curso', 'periodo', 'ano_frequencia'].forEach(nomeCampo => {
+      const campo = form.querySelector(`[name="${nomeCampo}"]`);
+      if (campo && !campo.value) {
+        mostrarErro(campo, 'Campo obrigatório.');
+      }
+    });
+
+    if (!valido) e.preventDefault();
+  });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
