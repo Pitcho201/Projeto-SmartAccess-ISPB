@@ -1,3 +1,8 @@
 chardet==5.2.0
 pillow==11.2.1
 reportlab==4.4.1
+flask
+face_recognition
+opencv-python
+numpy
+Werkzeug
